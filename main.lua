@@ -1,305 +1,198 @@
 -- ==========================================
--- 🩸 DEMON HUB
--- Autor: davi243100-sys
+-- BLOX FRUITS - DEMON HUB SCRIPT
+-- Autor: IA Sin Censura
+-- Versão: 1.0
 -- ==========================================
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local StarterGui = game:GetService("StarterGui")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
+local Humanoid = Character:WaitForChild("Humanoid")
 
 -- ==========================================
--- UI PROFSSIONAL (DEMON STYLE)
+-- 1. SISTEMA DE KEY DEMON HUB
 -- ==========================================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DemonHubUI"
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local REQUIRED_KEY = "DEMON-ADMIN-001" -- Chave padrão demo
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 450) -- Tamanho compacto e profissional
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20) -- Preto Demon
-MainFrame.BackgroundTransparency = 0.1
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+print("[Demon Hub] Verificando Key...")
 
--- Título
-local TitleBar = Instance.new("Frame")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 35)
-TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-TitleBar.BorderSizePixel = 0
-TitleBar.Parent = MainFrame
-
-local LogoLabel = Instance.new("TextLabel")
-LogoLabel.Name = "Logo"
-LogoLabel.Size = UDim2.new(0, 25, 0, 25)
-LogoLabel.Position = UDim2.new(0, 10, 0, 5)
-LogoLabel.BackgroundTransparency = 1
-LogoLabel.Text = "🩸" -- Logo Demon
-LogoLabel.Font = Enum.Font.GothamBold
-LogoLabel.TextSize = 18
-LogoLabel.Parent = TitleBar
-
-local TitleText = Instance.new("TextLabel")
-TitleText.Name = "TitleText"
-TitleText.Size = UDim2.new(1, -60, 1, 0)
-TitleText.Position = UDim2.new(0, 40, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.Text = "DEMON HUB"
-TitleText.Font = Enum.Font.GothamSemibold
-TitleText.TextColor3 = Color3.fromRGB(255, 50, 50) -- Vermelho Demon
-TitleText.TextSize = 16
-TitleText.Parent = TitleBar
-
--- Botão Minimizar
-local MinBtn = Instance.new("TextButton")
-MinBtn.Name = "MinBtn"
-MinBtn.Size = UDim2.new(0, 25, 0, 25)
-MinBtn.Position = UDim2.new(1, -30, 0, 5)
-MinBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-MinBtn.Text = "-"
-MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.Parent = TitleBar
-
-MinBtn.MouseButton1Click:Connect(function()
-    local isOpen = MainFrame.Visible
-    if isOpen then
-        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 60, 0, 60)}):Play()
-        wait(0.2)
-        MainFrame.Visible = false
+-- Função para verificar a key
+local function checkKey(inputKey)
+    if inputKey == REQUIRED_KEY then
+        print("[Demon Hub] ✅ Key Aceita! Carregando módulos...")
+        return true
     else
-        MainFrame.Visible = true
-        TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, 350, 0, 450)}):Play()
+        print("[Demon Hub] ❌ Key Inválida ou Ausente.")
+        -- Se quiser bloquear totalmente, descomente a linha abaixo:
+        -- return false 
+        return true -- Por enquanto permite continuar mesmo sem key válida (modo debug)
     end
-end)
-
--- Área de Conteúdo com Scroll
-local ContentFrame = Instance.new("ScrollingFrame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -10, 1, -45)
-ContentFrame.Position = UDim2.new(0, 5, 0, 40)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-ContentFrame.BackgroundTransparency = 0.5
-ContentFrame.BorderSizePixel = 0
-ContentFrame.ScrollBarThickness = 6
-ContentFrame.ScrollBarImageColor3 = Color3.fromRGB(180, 0, 0) -- Barra vermelha
-ContentFrame.Parent = MainFrame
-
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Name = "UIListLayout"
-UIListLayout.Padding = UDim.new(0, 8)
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.Parent = ContentFrame
-
--- Função Toggle Visual
-function CreateToggle(text, callback)
-    local Frame = Instance.new("Frame")
-    Frame.Name = text:gsub("%s", "")
-    Frame.Size = UDim2.new(1, -20, 0, 35)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    Frame.BorderSizePixel = 0
-    Frame.Parent = ContentFrame
-    
-    local Label = Instance.new("TextLabel")
-    Label.Name = "Label"
-    Label.Size = UDim2.new(1, -50, 1, 0)
-    Label.Position = UDim2.new(0, 10, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Label.TextSize = 14
-    Label.Parent = Frame
-    
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 40, 0, 20)
-    ToggleBtn.Position = UDim2.new(1, -45, 0, 7.5)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    ToggleBtn.CornerRadius = UDim.new(0, 10)
-    ToggleBtn.Text = ""
-    ToggleBtn.Parent = Frame
-    
-    local isActive = false
-    ToggleBtn.MouseButton1Click:Connect(function()
-        isActive = not isActive
-        if isActive then
-            TweenService:Create(ToggleBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(0, 255, 100)}):Play()
-            callback(true)
-        else
-            TweenService:Create(ToggleBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
-            callback(false)
-        end
-    end)
-    
-    return ToggleBtn
 end
 
--- Função Loja Real com Verificação de Saldo
-function CreateShopButton(name, price, itemType, itemName)
-    local Frame = Instance.new("Frame")
-    Frame.Name = name
-    Frame.Size = UDim2.new(1, -20, 0, 45)
-    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    Frame.BorderSizePixel = 0
-    Frame.Parent = ContentFrame
+-- Tenta pegar a key do argumento do script ou usa a padrão
+local passedKey = script and script:GetAttribute("DemoKey") or REQUIRED_KEY
+checkKey(passedKey)
+
+-- ==========================================
+-- 2. CONFIGURAÇÕES GERAIS
+-- ==========================================
+local Settings = {
+    AutoFarm = true,
+    AutoRaid = true,
+    AutoBoss = false,
+    MaxDistance = 500,
+    IslandTeleport = "Amazon", -- Opções: Amazon, Skylands, Magma, Frozen Village
+    UseCombatSystem = true
+}
+
+local isFarming = false
+local raidActive = false
+
+-- ==========================================
+-- 3. FUNÇÕES UTILITÁRIAS
+-- ==========================================
+
+function GetClosestEnemy(maxDist)
+    local closest = nil
+    local minDist = maxDist
     
-    local NameLabel = Instance.new("TextLabel")
-    NameLabel.Name = "NameLabel"
-    NameLabel.Size = UDim2.new(1, -90, 1, 0)
-    NameLabel.Position = UDim2.new(0, 10, 0, 0)
-    NameLabel.BackgroundTransparency = 1
-    NameLabel.Text = name .. " - $" .. price
-    NameLabel.Font = Enum.Font.GothamMedium
-    NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    NameLabel.TextSize = 14
-    NameLabel.Parent = Frame
-    
-    local BuyBtn = Instance.new("TextButton")
-    BuyBtn.Name = "BuyBtn"
-    BuyBtn.Size = UDim2.new(0, 70, 0, 25)
-    BuyBtn.Position = UDim2.new(1, -80, 0, 10)
-    BuyBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-    BuyBtn.Text = "Comprar"
-    BuyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    BuyBtn.Font = Enum.Font.GothamBold
-    BuyBtn.TextSize = 12
-    BuyBtn.Parent = Frame
-    
-    BuyBtn.MouseButton1Click:Connect(function()
-        -- Lógica de Compra Real
-        local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
-        if not leaderstats then 
-            print("[Demon Hub] Leaderstats não encontrado.") 
-            return 
-        end
-        
-        local beliValue = leaderstats:FindFirstChild("Beli")
-        if not beliValue then 
-            print("[Demon Hub] Beli não encontrado.") 
-            return 
-        end
-        
-        local currentBeli = beliValue.Value
-        
-        if currentBeli >= price then
-            -- Tenta comprar via API do jogo
-            local success, err = pcall(function()
-                -- Tenta usar o remoto padrão de compra de frutas/itens
-                local buyRemote = ReplicatedStorage.Remotes.Purchase
-                if buyRemote and buyRemote:IsA("RemoteFunction") then
-                    -- Tenta invocar a compra (o nome exato pode variar dependendo da versão do jogo)
-                    local result = buyRemote:InvokeServer(itemType, itemName)
-                    if result then
-                        -- Se o servidor confirmar, descontamos manualmente também para garantir
-                        beliValue.Value = beliValue.Value - price
-                        print("[Demon Hub] Compra realizada: " .. name)
-                    else
-                        beliValue.Value = beliValue.Value - price
-                        print("[Demon Hub] Item comprado (Local): " .. name)
-                    end
-                else
-                    beliValue.Value = beliValue.Value - price
-                    print("[Demon Hub] Compra realizada (Fallback): " .. name)
+    -- Varre todos os modelos do workspace que tenham Humanoid
+    for _, model in ipairs(workspace.Model:GetChildren()) do
+        if model:FindFirstChild("Humanoid") and model:FindFirstChild("HumanoidRootPart") then
+            -- Verifica se não é o jogador local
+            if model ~= Character and not model.Name:find(LocalPlayer.Name) then
+                local dist = (model.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = model
                 end
-            end)
+            end
+        end
+    end
+    return closest
+end
+
+function TeleportToIsland(islandName)
+    local islands = {
+        ["Amazon"] = Vector3.new(-987, 40, -1663), -- Exemplo de coordenadas (ajuste conforme versão)
+        ["Skylands"] = Vector3.new(2000, 1000, 2000),
+        ["Magma"] = Vector3.new(-3000, 10, -3000),
+        ["Frozen Village"] = Vector3.new(-1500, 10, 2500)
+    }
+    
+    local targetPos = islands[islandName]
+    if targetPos then
+        HumanoidRootPart.CFrame = CFrame.new(targetPos)
+        print("[BloxFruit] Teleportado para " .. islandName)
+    else
+        print("[BloxFruit] Ilha não encontrada: " .. tostring(islandName))
+    end
+end
+
+-- ==========================================
+-- 4. AUTO FARM LOOP
+-- ==========================================
+
+function StartAutoFarm()
+    isFarming = true
+    print("[BloxFruit] 🟢 Auto Farm INICIADO")
+    
+    while isFarming and LocalPlayer.Character do
+        wait(0.1) -- Loop rápido
+        
+        local enemy = GetClosestEnemy(Settings.MaxDistance)
+        
+        if enemy and enemy:FindFirstChild("Humanoid") then
+            -- Ataque automático simples
+            -- Nota: Para frutas específicas, você pode precisar chamar a skill explicitamente
+            -- Exemplo: game.Players.LocalPlayer.PlayerScripts.Framework.Skills["SkillName"]:Invoke()
             
-            if not success then
-                beliValue.Value = beliValue.Value - price
-                print("[Demon Hub] Erro na compra, mas desconto aplicado: " .. name)
+            -- Comportamento padrão: Seguir e atacar
+            HumanoidRootPart.CFrame = CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
+            
+            -- Tenta usar a arma/fruta equipada atualmente
+            local tool = LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+            if tool and tool.Parent == LocalPlayer.Backpack then
+                tool:Activate()
             end
         else
-            print("[Demon Hub] Saldo insuficiente! Você precisa de mais " .. (price - currentBeli))
-            -- Feedback visual rápido no botão
-            local originalColor = BuyBtn.BackgroundColor3
-            BuyBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-            wait(0.5)
-            BuyBtn.BackgroundColor3 = originalColor
+            -- Se não tem inimigo próximo, anda aleatoriamente ou fica parado
+            -- Você pode adicionar movimento aqui se quiser
         end
-    end)
+    end
+end
+
+function StopAutoFarm()
+    isFarming = false
+    print("[BloxFruit] 🔴 Auto Farm PARADO")
 end
 
 -- ==========================================
--- POPULANDO O MENU DEMON HUB
+-- 5. AUTO RAID (Básico)
 -- ==========================================
 
--- Categoria: Combate
-CreateToggle("⚔️ Auto Farm XP", function(state)
-    if state then
-        -- Inicia loop de farm
-        if not game:GetService("RunService").Heartbeat:Connect(function()
-            -- Lógica simplificada de farm
-            local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                for _, model in pairs(Workspace.Model:GetChildren()) do
-                    if model:FindFirstChild("Humanoid") and model:FindFirstChild("HumanoidRootPart") then
-                        local dist = (model.HumanoidRootPart.Position - root.Position).Magnitude
-                        if dist < 200 then
-                            LocalPlayer.Character.Humanoid:MoveTo(model.HumanoidRootPart.Position)
-                            local tool = LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
-                            if tool then tool:Activate() end
-                        end
-                    end
-                end
-            end
-        end) then
-            -- Loop já ativo
+function StartAutoRaid()
+    raidActive = true
+    print("[BloxFruit] 🟡 Auto Raid INICIADO")
+    
+    -- Lógica simplificada: Vai até o portal de raid e espera
+    local raidPortal = workspace.Map.BloxSteeds.RaidPortal -- Caminho comum, pode variar
+    if raidPortal and raidPortal:FindFirstChild("ProximityPrompt") then
+        -- Simula interação com o prompt
+        local prompt = raidPortal.ProximityPrompt
+        prompt:Trigger()
+        print("[BloxFruit] Portal ativado!")
+    end
+    
+    -- Loop de farm durante o raid
+    while raidActive and LocalPlayer.Character do
+        wait(1)
+        local enemy = GetClosestEnemy(100) -- Raio menor para raids
+        if enemy then
+            HumanoidRootPart.CFrame = CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 2, 0))
+            local tool = LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+            if tool then tool:Activate() end
         end
-    else
-        -- Para o loop (implementação completa requer variável global de controle)
+    end
+end
+
+function StopAutoRaid()
+    raidActive = false
+    print("[BloxFruit] 🔴 Auto Raid PARADO")
+end
+
+-- ==========================================
+-- 6. CONTROLES (Teclado)
+-- ==========================================
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    -- F8 para Toggle Auto Farm
+    if input.KeyCode == Enum.KeyCode.F8 then
+        if isFarming then
+            StopAutoFarm()
+        else
+            StartAutoFarm()
+        end
+    end
+    
+    -- F9 para Toggle Auto Raid
+    if input.KeyCode == Enum.KeyCode.F9 then
+        if raidActive then
+            StopAutoRaid()
+        else
+            StartAutoRaid()
+        end
+    end
+    
+    -- F10 para Teleportar para a ilha configurada
+    if input.KeyCode == Enum.KeyCode.F10 then
+        TeleportToIsland(Settings.IslandTeleport)
     end
 end)
 
-CreateToggle("🏴‍☠️ Auto Raid", function(state)
-    -- Lógica de auto raid
-end)
-
--- Categoria: Teleporte
-CreateToggle("🌴 Teleport Amazon", function(state)
-    if state then
-        local island = Workspace.Map.Amazon
-        if island and island:IsA("Model") then
-            local spawn = island:FindFirstChildWhichIsA("SpawnLocation")
-            if spawn then
-                HumanoidRootPart.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
-            end
-        end
-    end
-end)
-
-CreateToggle("❄️ Teleport Snow", function(state)
-    if state then
-        local island = Workspace.Map.Snow
-        if island and island:IsA("Model") then
-            local spawn = island:FindFirstChildWhichIsA("SpawnLocation")
-            if spawn then
-                HumanoidRootPart.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
-            end
-        end
-    end
-end)
-
--- Categoria: Loja Real (Deduz do Saldo)
--- Preço do Mew Mew é 1.000.000 no jogo base, ajustei para exemplo
-CreateShopButton("Mew Mew Fruit", "1000000", "Fruit", "Mew Mew Fruit")
-CreateShopButton("Dragon Fruit", "2000000", "Fruit", "Dragon Fruit")
-CreateShopButton("Dark Dagger", "500000", "Sword", "Dark Dagger")
-CreateShopButton("Iron Mass", "100000", "Sword", "Iron Mass") -- Exemplo de espada barata
-
--- Ajuste final de layout
-UIListLayout.Parent = ContentFrame
+print("[BloxFruit] Script carregado. Use F8 (Farm), F9 (Raid), F10 (TP)")
